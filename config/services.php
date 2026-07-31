@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'google_analytics' => [
+    'credentials' => env(
+        'GOOGLE_ANALYTICS_CREDENTIALS',
+        'storage/app/private/google-analytics-credentials.json'
+    ),
+],
+
 ];
