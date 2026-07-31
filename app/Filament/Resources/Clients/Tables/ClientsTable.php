@@ -27,12 +27,8 @@ class ClientsTable
                 TextColumn::make('website')
                     ->searchable()
                     ->sortable()
-                    ->limit(30)
+                    ->limit(20)
                     ->tooltip(fn ($record): ?string => $record->website)
-                    ->toggleable(),
-                TextColumn::make('analytics_property')
-                    ->searchable()
-                    ->sortable()
                     ->toggleable(),
                 TextColumn::make('store')
                     ->searchable()
@@ -40,7 +36,7 @@ class ClientsTable
                     ->toggleable(),
                 TextColumn::make('emails')
                     ->searchable()
-                    ->limit(30)
+                    ->limit(20)
                     ->tooltip(fn ($record): ?string => $record->emails)
                     ->toggleable(),
                 TextColumn::make('created_at')
