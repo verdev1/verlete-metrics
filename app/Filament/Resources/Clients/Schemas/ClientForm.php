@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Clients\Schemas;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Checkbox;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
@@ -14,6 +15,10 @@ class ClientForm
     {
         return $schema
             ->components([
+                Checkbox::make('is_active')
+                    ->label('Active')
+                    ->default(true),
+
                 TextInput::make('name')
                     ->label('Client name')
                     ->required()

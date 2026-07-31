@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
 
 class ClientsTable
@@ -14,16 +15,34 @@ class ClientsTable
     {
         return $table
             ->columns([
+                IconColumn::make('is_active')
+                    ->label('Active')
+                    ->boolean()
+                    ->sortable(),
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable()
+                    ->limit(30)
+                    ->tooltip(fn ($record): ?string => $record->name),
                 TextColumn::make('website')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable()
+                    ->limit(30)
+                    ->tooltip(fn ($record): ?string => $record->website)
+                    ->toggleable(),
                 TextColumn::make('analytics_property')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('store')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('emails')
-                    ->searchable(),
+                    ->searchable()
+                    ->limit(30)
+                    ->tooltip(fn ($record): ?string => $record->emails)
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
