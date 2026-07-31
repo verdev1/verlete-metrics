@@ -64,7 +64,7 @@ class ClientForm
                 TextInput::make('recipient_names')
                     ->label('Recipient names')
                     ->maxLength(255)
-                    ->helperText('Enter recipient names. Eg: “Hi Sam and Alex”.'),
+                    ->helperText('Enter recipient names. Eg: “Sam and Alex”.'),
 
                 TextInput::make('emails')
                     ->label('Email addresses')
