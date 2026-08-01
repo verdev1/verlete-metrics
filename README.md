@@ -3,12 +3,18 @@
 
 ## Manual Tests
 
-Numeric at the end of these manual test commands is client ID.
+* Numeric at the end of these manual test commands is client ID, eg: `php artisan analytics:test 1`
+* Specific month / year --month=YYYY-MM, eg: `php artisan analytics:test 1 --month=2026-06`
 
 ### Google Analytics
 
 ```
 php artisan analytics:test 1
+```
+
+Timeframe:
+```
+php artisan analytics:test 1 --month=2026-06
 ```
 
 ### Fluent Forms
@@ -17,14 +23,18 @@ php artisan analytics:test 1
 php artisan wordpress:test-forms 1
 ```
 
+Timeframe:
+```
+php artisan wordpress:test-forms 1 --month=2026-06
+```
+
 ### Ecommerce
 
-General test:
 ```
 php artisan store:test 1
 ```
 
-Specific time period:
+Timeframe:
 ```
 php artisan store:test 1 --month=2026-06
 ```
