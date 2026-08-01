@@ -18,3 +18,8 @@ composer install --no-dev --optimize-autoloader
 php artisan optimize:clear
 php artisan optimize
 ```
+
+Activate local env:
+```
+php artisan serve
+```
