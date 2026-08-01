@@ -19,10 +19,6 @@ class ClientsTable
                     ->label('Active')
                     ->boolean()
                     ->sortable(),
-                IconColumn::make('is_test')
-                    ->label('Test')
-                    ->boolean()
-                    ->sortable(),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable()
