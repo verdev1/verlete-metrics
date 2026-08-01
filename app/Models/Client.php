@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
     'is_active',
+    'is_test',
     'name',
     'website',
     'analytics_property',
@@ -27,6 +28,7 @@ class Client extends Model
     {
         return [
             'is_active' => 'boolean',
+            'is_test' => 'boolean',
             'application_password' => 'encrypted',
             'surecart_api_key' => 'encrypted',
         ];

@@ -19,6 +19,10 @@ class ClientForm
                     ->label('Active')
                     ->default(true),
 
+                Checkbox::make('is_test')
+                    ->label('Test')
+                    ->default(true),
+
                 TextInput::make('name')
                     ->label('Client name')
                     ->required()
