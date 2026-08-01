@@ -1,13 +1,23 @@
 # verlete-metrics
 
 
-## Google Analytics
+## Manual Tests
 
-Manual test command:
-(numeric is client ID)
+Numeric at the end of these manual test commands is client ID.
+
+### Google Analytics
+
 ```
 php artisan analytics:test 1
 ```
+
+### Fluent Forms
+
+```
+php artisan wordpress:test-forms 1
+```
+
+### 
 
 
 ## Commands
