@@ -53,3 +53,17 @@ Activate local env:
 ```
 php artisan serve
 ```
+
+### Tinker on Prod
+
+Issue: "User Notice  Writing to directory /home/1305801.cloudwaysapps.com/xxyvrvpfjf/.config/psysh is not allowed."
+
+Create a writable config directory inside Laravel’s storage folder:
+```
+mkdir -p storage/framework/psysh
+```
+
+Then launch Tinker with that directory:
+```
+XDG_CONFIG_HOME="$(pwd)/storage/framework/psysh" php artisan tinker
+```
