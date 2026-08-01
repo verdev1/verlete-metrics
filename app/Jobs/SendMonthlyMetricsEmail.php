@@ -8,13 +8,14 @@ use App\Models\EmailLog;
 use App\Services\MonthlyMessageService;
 use App\Services\MonthlyMetricsService;
 use Carbon\Carbon;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
 use RuntimeException;
 use Throwable;
 
-class SendMonthlyMetricsEmail implements ShouldQueue
+class SendMonthlyMetricsEmail implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;
 
@@ -26,9 +27,13 @@ class SendMonthlyMetricsEmail implements ShouldQueue
 
     public function __construct(
         public int $clientId,
-        public string $email,
         public string $month
     ) {
+    }
+
+    public function uniqueId(): string
+    {
+        return "monthly_metrics:{$this->clientId}:{$this->month}";
     }
 
     public function handle(
@@ -47,6 +52,24 @@ class SendMonthlyMetricsEmail implements ShouldQueue
             return;
         }
 
+        $emails = collect(
+            preg_split('/[,;\s]+/', $client->emails ?? '')
+        )
+            ->map(fn (string $email) => trim($email))
+            ->filter(fn (string $email) => filter_var(
+                $email,
+                FILTER_VALIDATE_EMAIL
+            ))
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($emails)) {
+            throw new RuntimeException(
+                "Client {$client->id} has no valid recipient emails."
+            );
+        }
+
         $startDate = Carbon::createFromFormat(
             '!Y-m',
             $this->month
@@ -57,18 +80,42 @@ class SendMonthlyMetricsEmail implements ShouldQueue
         $subject = "{$client->name} Monthly Metrics | "
             . $startDate->format('F Y');
 
-        /*
-         * A new record is created every time the queue attempts this job.
-         * Retries will therefore appear as separate attempt records.
-         */
-        $emailLog = EmailLog::create([
-            'client_id' => $client->id,
-            'type' => 'monthly_metrics',
-            'reporting_month' => $startDate->toDateString(),
-            'recipient_email' => $this->email,
+        $alreadySent = EmailLog::query()
+            ->where('client_id', $client->id)
+            ->where('type', 'monthly_metrics')
+            ->whereDate('reporting_month', $startDate->toDateString())
+            ->where('status', 'sent')
+            ->exists();
+
+        if ($alreadySent) {
+            return;
+        }
+
+        $emailLog = EmailLog::firstOrCreate(
+            [
+                'client_id' => $client->id,
+                'type' => 'monthly_metrics',
+                'reporting_month' => $startDate->toDateString(),
+            ],
+            [
+                'recipient_email' => implode(', ', $emails),
+                'subject' => $subject,
+                'status' => 'processing',
+                'attempted_at' => now(),
+            ]
+        );
+
+        if ($emailLog->status === 'sent') {
+            return;
+        }
+
+        $emailLog->update([
+            'recipient_email' => implode(', ', $emails),
             'subject' => $subject,
             'status' => 'processing',
             'attempted_at' => now(),
+            'sent_at' => null,
+            'error_message' => null,
         ]);
 
         try {
@@ -84,7 +131,7 @@ class SendMonthlyMetricsEmail implements ShouldQueue
                 'body' => $body,
             ]);
 
-            Mail::to($this->email)->send(
+            Mail::to($emails)->send(
                 new MonthlyMetricsMail($report)
             );
 

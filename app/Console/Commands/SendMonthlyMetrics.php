@@ -36,25 +36,12 @@ class SendMonthlyMetrics extends Command
         $jobCount = 0;
 
         foreach ($clients as $client) {
-            $emails = collect(
-                preg_split('/[,;\s]+/', $client->emails)
-            )
-                ->map(fn (string $email) => trim($email))
-                ->filter(fn (string $email) => filter_var(
-                    $email,
-                    FILTER_VALIDATE_EMAIL
-                ))
-                ->unique();
+            SendMonthlyMetricsEmail::dispatch(
+                $client->id,
+                $month->format('Y-m')
+            )->onQueue('monthly-metrics');
 
-            foreach ($emails as $email) {
-                SendMonthlyMetricsEmail::dispatch(
-                    $client->id,
-                    $email,
-                    $month->format('Y-m')
-                )->onQueue('monthly-metrics');
-
-                $jobCount++;
-            }
+            $jobCount++;
         }
 
         $this->info(
