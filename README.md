@@ -17,7 +17,17 @@ php artisan analytics:test 1
 php artisan wordpress:test-forms 1
 ```
 
-### 
+### Ecommerce
+
+General test:
+```
+php artisan store:test 1
+```
+
+Specific time period:
+```
+php artisan store:test 1 --month=2026-06
+```
 
 
 ## Laravel Helpers
