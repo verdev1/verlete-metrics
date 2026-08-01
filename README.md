@@ -50,6 +50,32 @@ Timeframe:
 php artisan metrics:test-email 1 play+test@verlete.com --month=2026-07
 ```
 
+### Manually Queue Active Clients
+
+Queue active clients:
+```
+php artisan metrics:send-monthly --month=2026-07
+```
+
+To process just the first job:
+```
+php artisan queue:work database \
+    --queue=monthly-metrics \
+    --once \
+    --tries=3 \
+    --timeout=180
+```
+
+To process all the jobs:
+```
+php artisan queue:work database \
+    --queue=monthly-metrics \
+    --stop-when-empty \
+    --rest=30 \
+    --tries=3 \
+    --timeout=180
+```
+
 ## Laravel Helpers
 
 Update laravel composer dependencies:
