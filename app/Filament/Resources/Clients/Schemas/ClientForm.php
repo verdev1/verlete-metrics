@@ -20,7 +20,8 @@ class ClientForm
                     ->default(true),
 
                 Checkbox::make('is_test')
-                    ->label('Test'),
+                    ->label('Test')
+                    ->default(false),
 
                 TextInput::make('name')
                     ->label('Client name')
