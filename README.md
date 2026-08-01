@@ -1,4 +1,4 @@
-# verlete-metrics
+# Verlete Metrics
 
 
 ## Manual Tests
@@ -20,7 +20,7 @@ php artisan wordpress:test-forms 1
 ### 
 
 
-## Commands
+## Laravel Helpers
 
 Update laravel composer dependencies:
 ```
