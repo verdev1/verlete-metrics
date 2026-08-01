@@ -39,6 +39,16 @@ Timeframe:
 php artisan store:test 1 --month=2026-06
 ```
 
+### Email Test
+
+```
+php artisan metrics:test-email 1 play+test@verlete.com
+```
+
+Timeframe:
+```
+php artisan metrics:test-email 1 play+test@verlete.com --month=2026-07
+```
 
 ## Laravel Helpers
 
