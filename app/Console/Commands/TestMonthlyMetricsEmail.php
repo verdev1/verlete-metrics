@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Mail\MonthlyMetricsMail;
 use App\Models\Client;
+use App\Models\EmailLog;
+use App\Services\MonthlyMessageService;
 use App\Services\MonthlyMetricsService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -21,16 +23,10 @@ class TestMonthlyMetricsEmail extends Command
     protected $description =
         'Generate and send a monthly metrics email to a test recipient';
 
-    public function handle(MonthlyMetricsService $metrics): int
-    {
-        $client = Client::find($this->argument('client'));
-
-        if (!$client) {
-            $this->error('Client not found.');
-
-            return self::FAILURE;
-        }
-
+    public function handle(
+        MonthlyMetricsService $metrics,
+        MonthlyMessageService $messages
+    ): int {
         $email = $this->argument('email');
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -39,11 +35,38 @@ class TestMonthlyMetricsEmail extends Command
             return self::FAILURE;
         }
 
+        $client = Client::find($this->argument('client'));
+
+        if (!$client) {
+            $this->error('Client not found.');
+
+            return self::FAILURE;
+        }
+
+        $emailLog = null;
+
         try {
             $month = $this->parseMonth();
 
             $startDate = $month->copy()->startOfMonth();
             $endDate = $month->copy()->endOfMonth();
+
+            $subject = "{$client->name} Monthly Metrics | "
+                . $startDate->format('F Y');
+
+            /*
+            * Create the log before collecting metrics or sending.
+            * This ensures failures are also recorded.
+            */
+            $emailLog = EmailLog::create([
+                'client_id' => $client->id,
+                'type' => 'monthly_metrics_test',
+                'reporting_month' => $startDate->toDateString(),
+                'recipient_email' => $email,
+                'subject' => $subject,
+                'status' => 'processing',
+                'attempted_at' => now(),
+            ]);
 
             $report = $metrics->generate(
                 $client,
@@ -51,10 +74,29 @@ class TestMonthlyMetricsEmail extends Command
                 $endDate
             );
 
+            $body = $messages->render($report);
+
+            $emailLog->update([
+                'body' => $body,
+            ]);
+
             Mail::to($email)->send(
                 new MonthlyMetricsMail($report)
             );
+
+            $emailLog->update([
+                'status' => 'sent',
+                'sent_at' => now(),
+                'error_message' => null,
+            ]);
         } catch (Throwable $exception) {
+            if ($emailLog) {
+                $emailLog->update([
+                    'status' => 'failed',
+                    'error_message' => $exception->getMessage(),
+                ]);
+            }
+
             $this->error($exception->getMessage());
 
             return self::FAILURE;
@@ -67,6 +109,8 @@ class TestMonthlyMetricsEmail extends Command
         $this->line(
             "{$startDate->toDateString()} to {$endDate->toDateString()}"
         );
+
+        $this->line("Email log ID: {$emailLog->id}");
 
         return self::SUCCESS;
     }
